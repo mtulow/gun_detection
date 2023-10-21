@@ -3,7 +3,7 @@ import cv2
 import json
 import numpy as np
 from pathlib import Path
-from scripts.script_utilities import delete_directories, create_directories
+from .script_utilities import delete_directories, create_directories
 
 
 def get_frames(file_path: Path) -> np.ndarray:

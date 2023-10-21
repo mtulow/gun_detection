@@ -2,7 +2,7 @@ from pathlib import Path
 import shutil
 import json
 import tqdm
-from scripts.script_utilities import (
+from .script_utilities import (
     delete_directories,
     create_directories
 )
