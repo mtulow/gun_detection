@@ -4,7 +4,7 @@ import PIL
 import shutil
 import json
 import tqdm
-from .script_utilities import delete_directories, create_directories
+from script_utilities import delete_directories, create_directories
 
 
 
