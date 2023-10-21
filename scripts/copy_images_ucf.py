@@ -24,11 +24,26 @@ def get_frames(file_path: str):
 src_dir = Path('Anomaly-Videos-Part-3')
 root = Path('data/ucf')
 dst_dir = root / 'images'
+dataset_pairs_dir = Path('')
 all_img_dir = Path('data/all_images')
+
+def delete_directories(*subdirs: tuple[Path]):
+    """Delete the given dataset sub-directories."""
+    for subdir in subdirs:
+        shutil.rmtree(subdir, )
+    return
+
+def create_directories(*subdirs: tuple[Path]):
+    """Create the given dataset sub-directories."""
+    for subdir in subdirs:
+        subdir.mkdir(exist_ok=True, parents=True)
+    return
+
 
 # Create directories
 dst_dir.mkdir(exist_ok=True, parents=True)
 all_img_dir.mkdir(exist_ok=True, parents=True)
+
 
 # load all annotations
 def load_annotations(annotation_file: str = None) -> dict:
@@ -89,13 +104,27 @@ def extract_frames_from_video(frames: dict, dst_path: str = 'data/ucf/images'):
 
 
 def copy_ucf_images():
-    frames = load_image_frames()
+    # Define dataset sub-directories
+    subdirectories = [
+            Path('data/ucf/images'),
+            Path('data/dataset_pairs/usrt_ucf'),
+            Path('data/dataset_pairs/ucf_mgd'),
+            Path('data/all_images'),
+    ]
+    # Delete then create all sub-directories
+    delete_directories(*subdirectories)
+    create_directories(*subdirectories)
 
+    # Load frame dictionary for dataset images
+    frames = load_image_frames()
+    
+    # Extract frames from mp4 file into dataset sub-directory
     extract_frames_from_video(frames, dst_path='data/ucf/images')
 
 
 if __name__ == '__main__':
     print()
-    # print("Copying UCF images...")
+    print('Copying UCF images...')
     copy_ucf_images()
+    print('Done!')
     print()
