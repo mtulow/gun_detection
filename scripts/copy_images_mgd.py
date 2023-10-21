@@ -4,43 +4,53 @@ import PIL
 import shutil
 import json
 import tqdm
+from scripts.script_utilities import delete_directories, create_directories
 
-src_dir = Path("MGD/MGD2020/JPEGImages/")
-dst_dir = Path("data/mgd/images")
-all_img_dir = Path("data/all_images")
 
-shutil.rmtree(dst_dir, ignore_errors=True)
 
-dst_dir.mkdir(exist_ok=True, parents=True)
-all_img_dir.mkdir(exist_ok=True, parents=True)
-
-def copy_mgd_images():
+def copy_mgd_images(src_dir: Path, *destinations: tuple[Path]):
+    # Load the annotations
     with open("data/mgd/annotation_detection/annotations_all.json", "r") as f:
         ann = json.load(f)
-
+    # Get the list of images
     img_list = set([img['file_name'] for img in ann['images']])
-    total_file_names = len(tuple(src_dir.iterdir()))
-
-    for path in tqdm.tqdm(src_dir.iterdir(), desc='Copying MGD Images', total=total_file_names):
+    # Iterate over the source directory
+    for path in tqdm.tqdm(src_dir.iterdir(), desc='Copying MGD Images', total=len([*src_dir.iterdir()])):
         if path.name not in img_list:
             continue
         try:
             plt.imread(path)
-            shutil.copyfile(path, dst_dir / path.name)
-            shutil.copyfile(path, all_img_dir / path.name)
+            for dst_dir in destinations:
+                shutil.copyfile(path, dst_dir / path.name)
 
         except PIL.UnidentifiedImageError:
             # Some images in the original source have a byte error
-
             with path.open("rb") as f:
                 temp = f.read()
-            for dest_path in [dst_dir / path.name, all_img_dir / path.name]:
-                with dest_path.open("wb") as f:
+            for dst_dir in destinations:
+                with (dst_dir / path.name).open("wb") as f:
                     f.write(temp.lstrip(b"\x00"))
+
+def main():
+    # Construct the source directory
+    src_dir = Path('MGD/MGD2020/JPEGImages')
+    # Construct the dataset sub-directories
+    destinations = [
+        Path("data/mgd/images"),
+        # Path("data/dataset_pairs/mgd_usrt"),
+        # Path("data/dataset_pairs/ucf_mgd"),
+        Path("data/all_images"),
+    ]
+    # Delete the dataset sub-directories
+    delete_directories(*destinations)
+    # Create the dataset sub-directories
+    create_directories(*destinations)
+    # Copy the MGD images
+    copy_mgd_images(src_dir, *destinations)
+    print('Done!')
 
 
 if __name__ == '__main__':
     print()
-    # print("Copying MGD images...")
-    copy_mgd_images()
+    main()
     print()
